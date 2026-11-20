@@ -3,6 +3,7 @@ import { memo } from "react";
 import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { NewsImage } from "@/components/news-image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import type { NewsItem } from "@/lib/news";
@@ -31,6 +32,10 @@ const markdownComponents: Components = {
       </a>
     );
   },
+  img: ({ src, alt }) =>
+    typeof src === "string" && src ? (
+      <NewsImage key={src} src={src} alt={alt ?? ""} fallback={alt || null} />
+    ) : alt || null,
 };
 
 function plainHeadline(text: string) {
@@ -68,6 +73,15 @@ function parseSourceUrl(value: string) {
   }
 }
 
+function isImageAttachment({ url, name, contentType }: NonNullable<NewsItem["attachments"]>[number]) {
+  const imageExtension = /\.(?:apng|avif|bmp|gif|jpe?g|png|svg|webp)$/i;
+  return (
+    contentType?.toLowerCase().startsWith("image/") ||
+    imageExtension.test(name) ||
+    imageExtension.test(new URL(url).pathname)
+  );
+}
+
 function AttachmentLink({ url, name }: { url: string; name: string }) {
   return (
     <a
@@ -98,6 +112,11 @@ export const NewsCard = memo(function NewsCard({ item }: { item: NewsItem }) {
     return url && !body.includes(link) ? [url] : [];
   });
   const attachments = (item.attachments ?? []).filter(({ url }) => parseSourceUrl(url));
+  const images = attachments.filter(isImageAttachment);
+  const imageRows = Array.from({ length: Math.ceil(images.length / 2) }, (_, index) =>
+    images.slice(index * 2, index * 2 + 2),
+  );
+  const files = attachments.filter((attachment) => !isImageAttachment(attachment));
   const date = new Date(item.publishedAt);
 
   return (
@@ -141,7 +160,29 @@ export const NewsCard = memo(function NewsCard({ item }: { item: NewsItem }) {
             )}
           </CardContent>
         )}
-        {(sources.length > 0 || attachments.length > 0) && (
+        {imageRows.length > 0 && (
+          <CardContent className="space-y-3">
+            {imageRows.map((row) => (
+              <div key={row[0].url} className={row.length > 1 ? "flex flex-col gap-3 sm:flex-row sm:items-start" : "grid"}>
+                {row.map(({ url, name }) => (
+                  <NewsImage
+                    key={url}
+                    src={url}
+                    alt={name || "Image attachment"}
+                    openOriginal
+                    fallback={
+                      <span className="min-w-0 rounded-lg border bg-muted/50 px-3 py-2.5 sm:flex-1">
+                        <span className="block text-xs text-muted-foreground">Preview unavailable</span>
+                        <AttachmentLink url={url} name={name} />
+                      </span>
+                    }
+                  />
+                ))}
+              </div>
+            ))}
+          </CardContent>
+        )}
+        {(sources.length > 0 || files.length > 0) && (
           <CardFooter className="flex-wrap gap-x-5 gap-y-3 text-muted-foreground">
             {sources.map((url) => (
               <a
@@ -155,7 +196,7 @@ export const NewsCard = memo(function NewsCard({ item }: { item: NewsItem }) {
                 <span className="wrap-anywhere">{url.hostname.replace(/^www\./, "")}</span>
               </a>
             ))}
-            {attachments.map(({ url, name }) => (
+            {files.map(({ url, name }) => (
               <AttachmentLink key={url} url={url} name={name} />
             ))}
           </CardFooter>
