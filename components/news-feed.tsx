@@ -1,6 +1,7 @@
 "use client";
 
 import { LoaderCircle, RefreshCw, Settings } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useInfiniteScroll } from "react-infinite-scroll-component";
 
@@ -15,6 +16,11 @@ const categoryOptions = [
   { value: "nerds-ai", label: "AI News" },
   { value: "nerds", label: "General Tech News" },
 ] satisfies { value: NewsCategory; label: string }[];
+const themeOptions = [
+  { value: "system", label: "System" },
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+];
 const storageKey = "tech-news-category";
 const categoryChangeEvent = "tech-news-category-change";
 let unavailableStorageCategory: NewsCategory | undefined;
@@ -74,6 +80,8 @@ export function NewsFeed() {
 }
 
 function NewsSettings({ category }: { category: NewsCategory | null }) {
+  const { theme, setTheme } = useTheme();
+
   return (
     <Dialog>
       <DialogTrigger
@@ -100,6 +108,15 @@ function NewsSettings({ category }: { category: NewsCategory | null }) {
           value={category ?? "all"}
           onValueChange={(value) => {
             if (isNewsCategory(value)) saveCategory(value);
+          }}
+        />
+        <SettingsSelect
+          id="news-theme"
+          label="Theme"
+          options={themeOptions}
+          value={theme ?? "system"}
+          onValueChange={(value) => {
+            if (value) setTheme(value);
           }}
         />
       </DialogContent>

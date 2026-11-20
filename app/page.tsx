@@ -16,7 +16,7 @@ export default function Home() {
                 alt=""
                 width={44}
                 height={44}
-                className="rounded-[24%]"
+                className="rounded-[24%] dark:ring-1 dark:ring-border"
                 unoptimized
               />
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Tech News</h1>
