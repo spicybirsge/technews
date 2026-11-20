@@ -4,7 +4,14 @@ import icon from "./icon.png";
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col items-start justify-center gap-5 px-6 py-16">
-      <Image src={icon} alt="" width={48} height={48} unoptimized />
+      <Image
+        src={icon}
+        alt=""
+        width={48}
+        height={48}
+        className="rounded-lg ring-1 ring-border"
+        unoptimized
+      />
       <div className="space-y-2">
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
           Tech News
