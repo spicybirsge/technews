@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 const siteName = "Tech News";
-const description = "Tech news shared by the Face’s Attic Discord community.";
+const description = "Stay updated with what is going on in tech. Powered by face's discord server.";
 
 export const metadata: Metadata = {
   title: {
@@ -21,12 +21,20 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`,
   },
   description,
+  manifest: "/site.webmanifest",
   openGraph: {
     type: "website",
     siteName,
     title: siteName,
     description,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#111111" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
