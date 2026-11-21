@@ -33,21 +33,34 @@ export async function fetchNews({
   if (category !== "all") url.searchParams.set("category", category);
   if (cursor) url.searchParams.set("cursor", cursor);
 
-  const timeout = AbortSignal.timeout(10000);
-  const response = await fetch(url, {
-    cache: "no-store",
-    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
-  });
-  if (!response.ok) throw new Error(`News API returned HTTP ${response.status}`);
+  const controller = new AbortController();
+  const abortFromCaller = () => controller.abort(signal?.reason);
+  if (signal?.aborted) abortFromCaller();
+  else signal?.addEventListener("abort", abortFromCaller, { once: true });
 
-  const page: NewsPage = await response.json();
-  if (
-    !Array.isArray(page?.items) ||
-    (page.nextCursor !== null && typeof page.nextCursor !== "string") ||
-    (cursor && cursor === page.nextCursor)
-  ) {
-    throw new Error("Invalid news page");
+  const timeout = setTimeout(() => {
+    controller.abort(new DOMException("The operation timed out.", "TimeoutError"));
+  }, 10_000);
+
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`News API returned HTTP ${response.status}`);
+
+    const page: NewsPage = await response.json();
+    if (
+      !Array.isArray(page?.items) ||
+      (page.nextCursor !== null && typeof page.nextCursor !== "string") ||
+      (cursor && cursor === page.nextCursor)
+    ) {
+      throw new Error("Invalid news page");
+    }
+
+    return page;
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener("abort", abortFromCaller);
   }
-
-  return page;
 }
