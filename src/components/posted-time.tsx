@@ -21,7 +21,6 @@ const exactDate = new Intl.DateTimeFormat("en", {
   hour: "numeric",
   minute: "2-digit",
   second: "2-digit",
-  timeZoneName: "short",
 });
 
 // One shared ticking clock for every timestamp on the page, running only while something is subscribed.
