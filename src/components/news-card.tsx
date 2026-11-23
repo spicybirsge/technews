@@ -1,9 +1,10 @@
-import { CalendarDays, Cpu, Link2, Paperclip, Sparkles, Tag } from "lucide-react";
+import { Cpu, Link2, Paperclip, Sparkles, Tag } from "lucide-react";
 import { memo } from "react";
 import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { NewsImage } from "@/components/news-image";
+import { PostedTime } from "@/components/posted-time";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import type { NewsItem } from "@/lib/news";
@@ -12,11 +13,6 @@ const categories = {
   "nerds-ai": { label: "AI", Icon: Sparkles },
   nerds: { label: "General Tech", Icon: Cpu },
 };
-
-const publishedDate = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeZone: "UTC",
-});
 
 const markdownComponents: Components = {
   a: ({ href, title, children }) => {
@@ -131,15 +127,7 @@ export const NewsCard = memo(function NewsCard({ item }: { item: NewsItem }) {
               <Icon data-icon="inline-start" aria-hidden="true" />
               {label}
             </Badge>
-            {Number.isFinite(date.getTime()) && (
-              <time
-                dateTime={item.publishedAt}
-                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"
-              >
-                <CalendarDays className="size-3.5" aria-hidden="true" />
-                {publishedDate.format(date)}
-              </time>
-            )}
+            {Number.isFinite(date.getTime()) && <PostedTime date={date} />}
           </div>
           <h3 className="font-heading text-xl leading-snug font-semibold tracking-tight wrap-anywhere sm:text-2xl">
             {title}
